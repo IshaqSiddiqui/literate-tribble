@@ -158,14 +158,21 @@
             const token = getUrlParameter('token');
             const email = getUrlParameter('email');
             
+            // For testing, allow the form to work even without parameters
             if (!token || !email) {
-                alert('Invalid or expired link. Please contact IT support.');
-                return;
+                // Use test values for now
+                document.getElementById('token').value = 'test-token-123';
+                document.getElementById('email').value = 'test@example.com';
+                document.getElementById('keyname').value = 'test@example.com-okta-managed';
+                
+                // Show a notice that this is test mode
+                const instructions = document.querySelector('.instructions');
+                instructions.innerHTML = '<h3>⚠️ TEST MODE</h3><p>This form is running in test mode. In production, it would be accessed via a secure link from your email.</p>' + instructions.innerHTML;
+            } else {
+                document.getElementById('token').value = token;
+                document.getElementById('email').value = email;
+                document.getElementById('keyname').value = email + '-okta-managed';
             }
-
-            document.getElementById('token').value = token;
-            document.getElementById('email').value = email;
-            document.getElementById('keyname').value = email + '-okta-managed';
         };
 
         // Form validation
