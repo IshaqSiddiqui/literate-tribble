@@ -211,11 +211,12 @@
             };
 
             // For now, we'll use webhook.site for testing
-            // Replace this URL with your Okta Workflows webhook URL later
+            // Replace this URL with your actual webhook.site URL
             const webhookUrl = 'https://webhook.site/4329118e-130e-4072-98c0-be1bd1530ce0';
 
             fetch(webhookUrl, {
                 method: 'POST',
+                mode: 'no-cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
